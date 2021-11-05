@@ -11,7 +11,10 @@ impl<T> LensView<T> for T {
     }
 }
 impl<T> LensOver<T> for T {
-    fn over(thing: T, f: &dyn Fn(Self::Field) -> Self::Field) -> T {
+    fn over<F>(thing: T, f: F) -> T
+    where
+        F: FnOnce(Self::Field) -> Self::Field,
+    {
         f(thing)
     }
 }

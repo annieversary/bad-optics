@@ -12,10 +12,13 @@ macro_rules! make_tuples {
             }
         }
         impl< $($t,)* > LensOver<( $($t,)* )> for _0 {
-            fn over(
+            fn over<F>(
                 mut tup: ($($t,)*),
-                f: &dyn Fn(Self::Field) -> Self::Field
-            ) -> ( $($t,)* ) {
+                f: F
+            ) -> ( $($t,)* )
+            where
+              F: FnOnce(Self::Field) -> Self::Field
+            {
                 tup.0 = f(tup.0);
                 tup
             }

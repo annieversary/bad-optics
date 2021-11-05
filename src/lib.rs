@@ -5,10 +5,12 @@ pub trait LensView<T> {
 }
 
 pub trait LensOver<T>: LensView<T> {
-    fn over(thing: T, f: &dyn Fn(Self::Field) -> Self::Field) -> T;
+    fn over<F>(thing: T, f: F) -> T
+    where
+        F: FnOnce(Self::Field) -> Self::Field;
 
     fn set(thing: T, v: Self::Field) -> T {
-        Self::over(thing, &|_| v)
+        Self::over(thing, |_| v)
     }
 }
 
@@ -18,7 +20,7 @@ pub fn view<T, L: LensView<T>>(_lens: L, thing: T) -> L::Field {
 pub fn set<T, L: LensOver<T>>(_lens: L, thing: T, v: L::Field) -> T {
     L::set(thing, v)
 }
-pub fn over<T, L: LensOver<T>>(_lens: L, thing: T, f: &dyn Fn(L::Field) -> L::Field) -> T {
+pub fn over<T, L: LensOver<T>>(_lens: L, thing: T, f: impl FnOnce(L::Field) -> L::Field) -> T {
     L::over(thing, f)
 }
 
