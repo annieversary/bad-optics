@@ -6,8 +6,8 @@ ergonomic no-macro lenses for rust
 
 ```rust
 use bad_optics::{
-lenses::{_0, _1},
-*,
+    lenses::{_0, _1},
+    *,
 };
 
 fn main() {
