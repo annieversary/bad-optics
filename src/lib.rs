@@ -84,11 +84,19 @@ mod tests {
     #[test]
     fn over_first_from_tuple() {
         let a = (1, 2);
-        let a = over(_0, a, &|v| v + 1);
+        let a = over(_0, a, |v| v + 1);
         assert_eq!(a, (2, 2));
 
         let a = (1, 2);
-        let a = _0::over(a, &|v| v + 1);
+        let a = _0::over(a, |v| v + 1);
         assert_eq!(a, (2, 2));
+    }
+
+    #[test]
+    fn over_first_from_array() {
+        let a = [1, 2, 3, 4];
+
+        let a = _0::over(a, |v| v + 1);
+        assert_eq!(a, [2, 2, 3, 4]);
     }
 }
