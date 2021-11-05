@@ -1,5 +1,6 @@
 use crate::{Lens, LensOver, LensTrait, LensView};
 
+#[derive(Clone, Copy)]
 pub struct Combination<A, B>(A, B);
 impl<A, B> LensTrait for Combination<A, B> {}
 

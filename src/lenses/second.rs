@@ -1,5 +1,6 @@
 use crate::{Lens, LensOver, LensTrait, LensView};
 
+#[derive(Clone, Copy)]
 pub struct _1Inner;
 pub const _1: Lens<_1Inner> = Lens(_1Inner);
 impl LensTrait for _1Inner {}

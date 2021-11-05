@@ -1,3 +1,5 @@
+#![feature(unboxed_closures, fn_traits)]
+
 /// Base trait
 pub trait LensTrait {}
 
@@ -20,6 +22,7 @@ pub trait LensOver<T>: LensView<T> {
 }
 
 /// Wrapper type
+#[derive(Clone, Copy)]
 pub struct Lens<T: LensTrait>(T);
 
 impl<L: LensTrait> LensTrait for Lens<L> {}
@@ -55,8 +58,6 @@ pub fn over<T, L: LensOver<T>>(_lens: L, thing: T, f: impl FnOnce(L::Field) -> L
     L::over(thing, f)
 }
 
-mod combinations;
-
 // TODO add fn impls
 
 // TODO add third_from_tuple, etc
@@ -65,6 +66,8 @@ mod combinations;
 
 // TODO make over work with changing types
 
+mod combinations;
+mod fns;
 pub mod lenses;
 
 #[cfg(test)]
@@ -149,5 +152,22 @@ mod tests {
         let lens = _0 + _1;
         let a = over(lens, a, |v| v + 1);
         assert_eq!(a, ((1, 3), 3));
+    }
+
+    #[test]
+    fn call_as_funcs() {
+        let a = (1, 2);
+        assert_eq!(_0(a), 1);
+
+        let a = (1, 2);
+        assert_eq!(_0(a, |v| v + 1), (2, 2));
+
+        let a = ((1, 2), 3);
+        let lens = _0 + _1;
+
+        let res = lens(a);
+        assert_eq!(res, 2);
+        let res = lens(a, |v| v + 1);
+        assert_eq!(res, ((1, 3), 3));
     }
 }
