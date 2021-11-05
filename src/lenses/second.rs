@@ -1,9 +1,12 @@
-use crate::{Lens, LensOver, LensTrait, LensView};
+use crate::{
+    lenses::{LensOver, LensView},
+    Optics, OpticsTrait,
+};
 
 #[derive(Clone, Copy)]
 pub struct _1Inner;
-pub const _1: Lens<_1Inner> = Lens(_1Inner);
-impl LensTrait for _1Inner {}
+pub const _1: Optics<_1Inner> = Optics(_1Inner);
+impl OpticsTrait for _1Inner {}
 
 macro_rules! make_tuples {
     ($f:ident, ( $( $v:ident ),* ), ( $( $t:ident ),* ) ) => {

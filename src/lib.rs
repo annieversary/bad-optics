@@ -1,70 +1,22 @@
 #![feature(unboxed_closures, fn_traits)]
 
-/// Base trait
-pub trait LensTrait {}
-
-/// For lenses that allow viewing
-pub trait LensView<T>: LensTrait {
-    type Field;
-
-    fn view(thing: T) -> Self::Field;
-}
-
-/// For lenses that allow setting
-pub trait LensOver<T>: LensView<T> {
-    fn over<F>(thing: T, f: F) -> T
-    where
-        F: FnOnce(Self::Field) -> Self::Field;
-
-    fn set(thing: T, v: Self::Field) -> T {
-        Self::over(thing, |_| v)
-    }
-}
-
-/// Wrapper type
-#[derive(Clone, Copy)]
-pub struct Lens<T: LensTrait>(T);
-
-impl<L: LensTrait> LensTrait for Lens<L> {}
-impl<L, T> LensView<T> for Lens<L>
-where
-    L: LensView<T>,
-{
-    type Field = L::Field;
-
-    fn view(thing: T) -> Self::Field {
-        L::view(thing)
-    }
-}
-impl<L, T> LensOver<T> for Lens<L>
-where
-    L: LensOver<T>,
-{
-    fn over<F>(thing: T, f: F) -> T
-    where
-        F: FnOnce(Self::Field) -> Self::Field,
-    {
-        L::over(thing, f)
-    }
-}
-
-pub fn view<T, L: LensView<T>>(_lens: L, thing: T) -> L::Field {
-    L::view(thing)
-}
-pub fn set<T, L: LensOver<T>>(_lens: L, thing: T, v: L::Field) -> T {
-    L::set(thing, v)
-}
-pub fn over<T, L: LensOver<T>>(_lens: L, thing: T, f: impl FnOnce(L::Field) -> L::Field) -> T {
-    L::over(thing, f)
-}
-
 // TODO add third_from_tuple, etc
 
 // TODO array traversals
 
 // TODO something for structs
 
+// TODO something for Ok, Some, etc
+
 // TODO make over work with changing types
+
+/// Base trait
+pub trait OpticsTrait {}
+
+/// Wrapper type
+#[derive(Clone, Copy)]
+pub struct Optics<T: OpticsTrait>(pub(crate) T);
+impl<L: OpticsTrait> OpticsTrait for Optics<L> {}
 
 mod combinations;
 mod fns;
@@ -72,10 +24,7 @@ pub mod lenses;
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        lenses::{_0, _1},
-        *,
-    };
+    use super::lenses::*;
 
     #[test]
     fn view_first_from_tuple() {

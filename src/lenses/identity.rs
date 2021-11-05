@@ -1,10 +1,13 @@
-use crate::{LensOver, LensTrait, LensView};
+use crate::{
+    lenses::{LensOver, LensView},
+    OpticsTrait,
+};
 
 #[allow(non_camel_case_types)]
 #[derive(Clone, Copy)]
 pub struct id;
 
-impl LensTrait for id {}
+impl OpticsTrait for id {}
 impl<T> LensView<T> for id {
     type Field = T;
 

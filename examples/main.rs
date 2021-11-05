@@ -1,7 +1,4 @@
-use bad_optics::{
-    lenses::{_0, _1},
-    *,
-};
+use bad_optics::lenses::*;
 
 fn main() {
     let a = ((1, 2), 3);
