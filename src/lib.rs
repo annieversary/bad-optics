@@ -58,11 +58,11 @@ pub fn over<T, L: LensOver<T>>(_lens: L, thing: T, f: impl FnOnce(L::Field) -> L
     L::over(thing, f)
 }
 
-// TODO add fn impls
-
 // TODO add third_from_tuple, etc
 
 // TODO array traversals
+
+// TODO something for structs
 
 // TODO make over work with changing types
 
@@ -163,6 +163,10 @@ mod tests {
         assert_eq!(_0(a, |v| v + 1), (2, 2));
 
         let a = ((1, 2), 3);
+
+        let res = _0(a);
+        assert_eq!(res, (1, 2));
+
         let lens = _0 + _1;
 
         let res = lens(a);
