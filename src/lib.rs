@@ -1,9 +1,14 @@
-pub trait LensView<T> {
+/// Base trait
+pub trait LensTrait {}
+
+/// For lenses that allow viewing
+pub trait LensView<T>: LensTrait {
     type Field;
 
     fn view(thing: T) -> Self::Field;
 }
 
+/// For lenses that allow setting
 pub trait LensOver<T>: LensView<T> {
     fn over<F>(thing: T, f: F) -> T
     where
@@ -11,6 +16,32 @@ pub trait LensOver<T>: LensView<T> {
 
     fn set(thing: T, v: Self::Field) -> T {
         Self::over(thing, |_| v)
+    }
+}
+
+/// Wrapper type
+pub struct Lens<T: LensTrait>(T);
+
+impl<L: LensTrait> LensTrait for Lens<L> {}
+impl<L, T> LensView<T> for Lens<L>
+where
+    L: LensView<T>,
+{
+    type Field = L::Field;
+
+    fn view(thing: T) -> Self::Field {
+        L::view(thing)
+    }
+}
+impl<L, T> LensOver<T> for Lens<L>
+where
+    L: LensOver<T>,
+{
+    fn over<F>(thing: T, f: F) -> T
+    where
+        F: FnOnce(Self::Field) -> Self::Field,
+    {
+        L::over(thing, f)
     }
 }
 
@@ -24,11 +55,11 @@ pub fn over<T, L: LensOver<T>>(_lens: L, thing: T, f: impl FnOnce(L::Field) -> L
     L::over(thing, f)
 }
 
-// TODO add Fn implementation for lenses
-//      with one param it should be view, with two it should be over
-// TODO add std::ops::Add to combine lenses
+mod combinations;
 
-// TODO add second_from_tuple, etc
+// TODO add fn impls
+
+// TODO add third_from_tuple, etc
 
 // TODO array traversals
 
@@ -38,16 +69,15 @@ pub mod lenses;
 
 #[cfg(test)]
 mod tests {
-    use super::{lenses::_0, *};
+    use super::{
+        lenses::{_0, _1},
+        *,
+    };
 
     #[test]
     fn view_first_from_tuple() {
         let a = (1, 2);
         assert_eq!(view(_0, a), 1);
-
-        // you can call it both ways
-        let a = (1, 2);
-        assert_eq!(_0::view(a), 1);
 
         let a = (1, 2);
         assert_eq!(view(_0, &a), &1);
@@ -75,10 +105,6 @@ mod tests {
         let a = (1, 2);
         let a = set(_0, a, 3);
         assert_eq!(a, (3, 2));
-
-        let a = (1, 2);
-        let a = _0::set(a, 3);
-        assert_eq!(a, (3, 2));
     }
 
     #[test]
@@ -86,17 +112,42 @@ mod tests {
         let a = (1, 2);
         let a = over(_0, a, |v| v + 1);
         assert_eq!(a, (2, 2));
-
-        let a = (1, 2);
-        let a = _0::over(a, |v| v + 1);
-        assert_eq!(a, (2, 2));
     }
 
     #[test]
     fn over_first_from_array() {
         let a = [1, 2, 3, 4];
 
-        let a = _0::over(a, |v| v + 1);
+        let a = over(_0, a, |v| v + 1);
         assert_eq!(a, [2, 2, 3, 4]);
+    }
+
+    #[test]
+    fn second() {
+        let a = (1, 2);
+        let a = over(_1, a, |v| v + 1);
+        assert_eq!(a, (1, 3));
+
+        let a = [1, 2, 3, 4];
+        let a = over(_1, a, |v| v + 1);
+        assert_eq!(a, [1, 3, 3, 4]);
+    }
+
+    #[test]
+    fn view_combination() {
+        let a = ((1, 2), 3);
+
+        let lens = _0 + _1;
+        let a = view(lens, a);
+        assert_eq!(a, 2);
+    }
+
+    #[test]
+    fn over_combination() {
+        let a = ((1, 2), 3);
+
+        let lens = _0 + _1;
+        let a = over(lens, a, |v| v + 1);
+        assert_eq!(a, ((1, 3), 3));
     }
 }
