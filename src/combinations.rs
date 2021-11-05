@@ -1,5 +1,6 @@
 use crate::{
     lenses::{LensOver, LensView},
+    prisms::PrismPreview,
     Optics, OpticsTrait,
 };
 
@@ -41,5 +42,17 @@ where
         F: FnOnce(Self::Field) -> Self::Field,
     {
         A::over(thing, |b| B::over(b, f))
+    }
+}
+
+impl<A, B, T> PrismPreview<T> for Combination<A, B>
+where
+    A: LensView<T>,
+    B: PrismPreview<A::Field>,
+{
+    type Field = B::Field;
+
+    fn preview(thing: T) -> Option<Self::Field> {
+        B::preview(A::view(thing))
     }
 }

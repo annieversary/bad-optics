@@ -57,3 +57,106 @@ pub fn set<T, L: LensOver<T>>(_lens: L, thing: T, v: L::Field) -> T {
 pub fn over<T, L: LensOver<T>>(_lens: L, thing: T, f: impl FnOnce(L::Field) -> L::Field) -> T {
     L::over(thing, f)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn view_first_from_tuple() {
+        let a = (1, 2);
+        assert_eq!(view(_0, a), 1);
+
+        let a = (1, 2);
+        assert_eq!(view(_0, &a), &1);
+
+        let mut a = (1, 2);
+        assert_eq!(view(_0, &mut a), &mut 1);
+
+        let a = (1, 2, 3);
+        assert_eq!(view(_0, a), 1);
+
+        let a = (1, 2, 3);
+        assert_eq!(view(_0, &a), &1);
+    }
+
+    #[test]
+    fn view_first_from_tuple_mut_works() {
+        let mut a = (1, 2);
+        *view(_0, &mut a) += 1;
+
+        assert_eq!(a, (2, 2));
+    }
+
+    #[test]
+    fn set_first_from_tuple() {
+        let a = (1, 2);
+        let a = set(_0, a, 3);
+        assert_eq!(a, (3, 2));
+    }
+
+    #[test]
+    fn over_first_from_tuple() {
+        let a = (1, 2);
+        let a = over(_0, a, |v| v + 1);
+        assert_eq!(a, (2, 2));
+    }
+
+    #[test]
+    fn over_first_from_array() {
+        let a = [1, 2, 3, 4];
+
+        let a = over(_0, a, |v| v + 1);
+        assert_eq!(a, [2, 2, 3, 4]);
+    }
+
+    #[test]
+    fn second() {
+        let a = (1, 2);
+        let a = over(_1, a, |v| v + 1);
+        assert_eq!(a, (1, 3));
+
+        let a = [1, 2, 3, 4];
+        let a = over(_1, a, |v| v + 1);
+        assert_eq!(a, [1, 3, 3, 4]);
+    }
+
+    #[test]
+    fn view_combination() {
+        let a = ((1, 2), 3);
+
+        let lens = _0 + _1;
+        let a = view(lens, a);
+        assert_eq!(a, 2);
+    }
+
+    #[test]
+    fn over_combination() {
+        let a = ((1, 2), 3);
+
+        let lens = _0 + _1;
+        let a = over(lens, a, |v| v + 1);
+        assert_eq!(a, ((1, 3), 3));
+    }
+
+    #[test]
+    fn call_as_funcs() {
+        let a = (1, 2);
+        assert_eq!(_0(a), 1);
+
+        let a = (1, 2);
+        assert_eq!(_0(a, |v| v + 1), (2, 2));
+
+        let a = ((1, 2), 3);
+
+        let res = _0(a);
+        assert_eq!(res, (1, 2));
+
+        let lens = _0 + _1;
+
+        let res = lens(a);
+        assert_eq!(res, 2);
+        let res = lens(a, |v| v + 1);
+        assert_eq!(res, ((1, 3), 3));
+    }
+}
