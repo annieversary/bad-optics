@@ -1,6 +1,5 @@
 use crate::{Optics, OpticsTrait};
 
-/// For lenses that allow viewing
 pub trait PrismPreview<T>: OpticsTrait {
     type Field;
 
