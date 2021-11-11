@@ -1,6 +1,6 @@
 use crate::lenses::{Lens, LensView};
 
-use super::lens::LensInner;
+use super::lens::FuncLens;
 
 pub struct ToInner<T, U>(Box<dyn Fn(T) -> U>);
 
@@ -23,7 +23,7 @@ pub fn to<T, U>(f: impl Fn(T) -> U + 'static) -> Lens<ToInner<T, U>> {
 
 impl<T, U> Lens<ToInner<T, U>> {
     /// Makes a full lens that implements `LensView<T>` and `LensOver<T>` with the provided functions
-    pub fn make_lens(self, setter: impl Fn(T, U) -> T + 'static) -> Lens<LensInner<T, U>> {
-        Lens(LensInner((self.0).0, Box::new(setter)))
+    pub fn make_lens(self, setter: impl Fn(T, U) -> T + 'static) -> Lens<FuncLens<T, U>> {
+        Lens(FuncLens((self.0).0, Box::new(setter)))
     }
 }
