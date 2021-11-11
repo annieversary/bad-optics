@@ -12,7 +12,6 @@ impl<T> TraversalTraverse<Vec<T>> for EachInner {
         thing
     }
 }
-
 impl<T> TraversalOver<Vec<T>> for EachInner {
     fn over<F>(&self, thing: Vec<T>, f: F) -> Vec<T>
     where
@@ -21,6 +20,34 @@ impl<T> TraversalOver<Vec<T>> for EachInner {
         thing.into_iter().map(f).collect()
     }
 }
+
+// TODO i'd like to have this so we get it for free on any iterable
+// problem is, arrays/tuples don't implement FromIter
+// and having both the blanket implementation and the one below complains cause
+// other crates could add the trait in the future
+
+// impl<I, T> TraversalTraverse<I> for EachInner
+// where
+//     I: IntoIterator<Item = T>,
+// {
+//     type Field = T;
+
+//     fn traverse(&self, thing: I) -> Vec<Self::Field> {
+//         thing.into_iter().collect()
+//     }
+// }
+
+// impl<I, T> TraversalOver<I> for EachInner
+// where
+//     I: IntoIterator<Item = T> + FromIterator<T>,
+// {
+//     fn over<F>(&self, thing: I, f: F) -> I
+//     where
+//         F: FnMut(Self::Field) -> Self::Field,
+//     {
+//         thing.into_iter().map(f).collect()
+//     }
+// }
 
 macro_rules! make_tuples {
     ($f:ident, ( $( $v:ident ),* ), ( $( $t:ident ),* ) ) => {
