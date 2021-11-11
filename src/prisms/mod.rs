@@ -14,6 +14,7 @@ pub trait PrismPreview<T> {
 
     fn preview(&self, thing: T) -> Option<Self::Field>;
     fn review(&self, thing: Self::Field) -> T;
+
     // TODO id like for this to not need clone
     fn over<F>(&self, thing: T, f: F) -> T
     where

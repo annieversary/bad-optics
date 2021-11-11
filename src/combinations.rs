@@ -1,6 +1,6 @@
 use crate::{
     lenses::{Lens, LensOver, LensView},
-    prisms::Prism,
+    prisms::{Prism, PrismPreview},
     traversals::{Traversal, TraversalOver, TraversalTraverse},
 };
 
@@ -15,6 +15,14 @@ impl<A, B> std::ops::Add<Lens<B>> for Lens<A> {
 
     fn add(self, rhs: Lens<B>) -> Self::Output {
         Lens(Combination(self, rhs))
+    }
+}
+// prism + prism
+impl<A, B> std::ops::Add<Prism<B>> for Prism<A> {
+    type Output = Prism<Combination<Prism<A>, Prism<B>>>;
+
+    fn add(self, rhs: Prism<B>) -> Self::Output {
+        Prism(Combination(self, rhs))
     }
 }
 // traversal + traversal
@@ -57,10 +65,27 @@ impl<A, B> std::ops::Add<Traversal<B>> for Prism<A> {
         Traversal(Combination(self.to_traversal(), rhs))
     }
 }
+// lens + prism
+impl<A, B> std::ops::Add<Prism<B>> for Lens<A> {
+    type Output = Traversal<Combination<Traversal<Lens<A>>, Traversal<Prism<B>>>>;
+
+    fn add(self, rhs: Prism<B>) -> Self::Output {
+        Traversal(Combination(self.to_traversal(), rhs.to_traversal()))
+    }
+}
+// prism + traversal
+impl<A, B> std::ops::Add<Lens<B>> for Prism<A> {
+    type Output = Traversal<Combination<Traversal<Prism<A>>, Traversal<Lens<B>>>>;
+
+    fn add(self, rhs: Lens<B>) -> Self::Output {
+        Traversal(Combination(self.to_traversal(), rhs.to_traversal()))
+    }
+}
 
 // trait impls for Combination
 
-impl<A, B, T> LensView<T> for Combination<A, B>
+// lens + lens
+impl<A, B, T> LensView<T> for Combination<Lens<A>, Lens<B>>
 where
     A: LensView<T>,
     B: LensView<A::Field>,
@@ -68,11 +93,10 @@ where
     type Field = B::Field;
 
     fn view(&self, thing: T) -> Self::Field {
-        B::view(&self.1, A::view(&self.0, thing))
+        B::view(&self.1 .0, A::view(&self.0 .0, thing))
     }
 }
-
-impl<A, B, T> LensOver<T> for Combination<A, B>
+impl<A, B, T> LensOver<T> for Combination<Lens<A>, Lens<B>>
 where
     A: LensOver<T>,
     B: LensOver<A::Field>,
@@ -81,11 +105,35 @@ where
     where
         F: FnOnce(Self::Field) -> Self::Field,
     {
-        A::over(&self.0, thing, |b| B::over(&self.1, b, f))
+        A::over(&self.0 .0, thing, |b| B::over(&self.1 .0, b, f))
     }
 }
 
-impl<A, B, T> TraversalTraverse<T> for Combination<A, B>
+// prism + prism
+impl<A, B, T> PrismPreview<T> for Combination<Prism<A>, Prism<B>>
+where
+    A: PrismPreview<T>,
+    B: PrismPreview<A::Field>,
+{
+    type Field = B::Field;
+
+    fn preview(&self, thing: T) -> Option<Self::Field> {
+        A::preview(&self.0 .0, thing).and_then(|a| B::preview(&self.1 .0, a))
+    }
+
+    fn review(&self, thing: Self::Field) -> T {
+        A::review(&self.0 .0, B::review(&self.1 .0, thing))
+    }
+}
+
+// traversal + traversal
+// lens + traversal
+// traversal + lens
+// prism + traversal
+// traversal + prism
+// prism + lens
+// lens + prism
+impl<A, B, T> TraversalTraverse<T> for Combination<Traversal<A>, Traversal<B>>
 where
     A: TraversalTraverse<T>,
     B: TraversalTraverse<A::Field>,
@@ -93,15 +141,14 @@ where
     type Field = B::Field;
 
     fn traverse(&self, thing: T) -> Vec<Self::Field> {
-        let a = A::traverse(&self.0, thing);
+        let a = A::traverse(&self.0 .0, thing);
         a.into_iter()
-            .map(|v| B::traverse(&self.1, v))
+            .map(|v| B::traverse(&self.1 .0, v))
             .flatten()
             .collect()
     }
 }
-
-impl<A, B, T> TraversalOver<T> for Combination<A, B>
+impl<A, B, T> TraversalOver<T> for Combination<Traversal<A>, Traversal<B>>
 where
     A: TraversalOver<T>,
     B: TraversalOver<A::Field>,
@@ -110,7 +157,7 @@ where
     where
         F: FnMut(Self::Field) -> Self::Field,
     {
-        A::over(&self.0, thing, |b| B::over(&self.1, b, &mut f))
+        A::over(&self.0 .0, thing, |b| B::over(&self.1 .0, b, &mut f))
     }
 }
 
@@ -138,6 +185,15 @@ mod tests {
         let lens = _0 + _1;
         let a = lens(a, |v| v + 1);
         assert_eq!(a, ((1, 3), 3));
+    }
+
+    #[test]
+    fn can_combine_prisms() {
+        let thing = Some(Some(3));
+
+        // combine two traversals
+        let res = (_Some + _Some)(thing, |v| v + 1);
+        assert_eq!(res, Some(Some(4)));
     }
 
     #[test]
@@ -220,5 +276,49 @@ mod tests {
         // over
         let res = t(array, |v| v + 1);
         assert_eq!(res, None);
+    }
+
+    #[test]
+    fn can_combine_prism_with_lens() {
+        let thing = Some((1, 2));
+
+        // combine a traversal with a lens
+        let t = _Some + _0;
+
+        // NOTE: combination of a prism and a lens is a traversal
+        //
+        // > The optic kind resulting from a composition is the least upper bound (join)
+        // > of the optic kinds being composed, if it exists.
+        // > The Join type family computes the least upper bound given two optic kind tags.
+        // > For example the Join of a Lens and a Prism is an AffineTraversal.
+        //
+        // from: https://hackage.haskell.org/package/optics-0.4/docs/Optics.html
+
+        // traversal
+        let res = t(thing);
+        assert_eq!(res, vec![1]);
+
+        // over
+        let res = t(thing, |v| v + 1);
+        assert_eq!(res, Some((2, 2)));
+    }
+
+    #[test]
+    fn can_combine_lens_with_prism() {
+        let thing = (Some(1), 2);
+
+        // combine a traversal with a lens
+        let t = _0 + _Some;
+
+        // NOTE: combination of a lens and a prism is a traversal
+        // see can_combine_prism_with_lens for more info
+
+        // traversal
+        let res = t(thing);
+        assert_eq!(res, vec![1]);
+
+        // over
+        let res = t(thing, |v| v + 1);
+        assert_eq!(res, (Some(2), 2));
     }
 }
