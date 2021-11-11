@@ -1,3 +1,5 @@
+mod fields;
+
 mod identity;
 pub use identity::id;
 
@@ -162,6 +164,18 @@ mod tests {
 
         let hello = Hello { hey: 8 };
         assert_eq!(l(hello), 8);
+    }
+
+    #[test]
+    fn can_make_lens_for_field() {
+        // making a lens
+        let l = crate::field_lens!(Hello, hey);
+
+        let hello = Hello { hey: 8 };
+        assert_eq!(l(hello), 8);
+
+        let hello = Hello { hey: 8 };
+        assert_eq!(l(hello, |v| v + 1), Hello { hey: 9 });
     }
 
     #[test]
