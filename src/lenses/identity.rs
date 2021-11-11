@@ -1,21 +1,18 @@
-use crate::{
-    lenses::{LensOver, LensView},
-    OpticsTrait,
-};
+use crate::lenses::{Lens, LensOver, LensView};
 
-#[allow(non_camel_case_types)]
 #[derive(Clone, Copy)]
-pub struct id;
+pub struct IdInner;
+#[allow(non_upper_case_globals)]
+pub const id: Lens<IdInner> = Lens(IdInner);
 
-impl OpticsTrait for id {}
-impl<T> LensView<T> for id {
+impl<T> LensView<T> for IdInner {
     type Field = T;
 
     fn view(&self, thing: T) -> Self::Field {
         thing
     }
 }
-impl<T> LensOver<T> for id {
+impl<T> LensOver<T> for IdInner {
     fn over<F>(&self, thing: T, f: F) -> T
     where
         F: FnOnce(Self::Field) -> Self::Field,

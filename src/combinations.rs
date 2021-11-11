@@ -1,21 +1,13 @@
-use crate::{
-    lenses::{LensOver, LensView},
-    Optics, OpticsTrait,
-};
+use crate::lenses::{Lens, LensOver, LensView};
 
 #[derive(Clone, Copy)]
 pub struct Combination<A, B>(A, B);
-impl<A, B> OpticsTrait for Combination<A, B> {}
 
-impl<A, B> std::ops::Add<Optics<B>> for Optics<A>
-where
-    A: OpticsTrait,
-    B: OpticsTrait,
-{
-    type Output = Optics<Combination<Optics<A>, Optics<B>>>;
+impl<A, B> std::ops::Add<Lens<B>> for Lens<A> {
+    type Output = Lens<Combination<Lens<A>, Lens<B>>>;
 
-    fn add(self, rhs: Optics<B>) -> Self::Output {
-        Optics(Combination(self, rhs))
+    fn add(self, rhs: Lens<B>) -> Self::Output {
+        Lens(Combination(self, rhs))
     }
 }
 

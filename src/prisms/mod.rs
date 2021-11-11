@@ -1,6 +1,15 @@
-use crate::{Optics, OpticsTrait};
+mod result;
+pub use result::{_Err, _Ok};
 
-pub trait PrismPreview<T>: OpticsTrait {
+mod option;
+pub use option::{_None, _Some};
+
+/// Wrapper type
+#[derive(Clone, Copy)]
+#[repr(transparent)]
+pub struct Prism<P>(pub(crate) P);
+
+pub trait PrismPreview<T> {
     type Field;
 
     fn preview(thing: T) -> Option<Self::Field>;
@@ -9,7 +18,7 @@ pub trait PrismReview<T>: PrismPreview<T> {
     fn review(thing: Self::Field) -> T;
 }
 
-impl<P, T> PrismPreview<T> for Optics<P>
+impl<P, T> PrismPreview<T> for Prism<P>
 where
     P: PrismPreview<T>,
 {
@@ -20,7 +29,7 @@ where
     }
 }
 
-impl<P, T> PrismReview<T> for Optics<P>
+impl<P, T> PrismReview<T> for Prism<P>
 where
     P: PrismReview<T>,
 {
@@ -35,12 +44,6 @@ pub fn preview<T, P: PrismPreview<T>>(_prism: P, thing: T) -> Option<P::Field> {
 pub fn review<T, P: PrismReview<T>>(_prism: P, thing: P::Field) -> T {
     P::review(thing)
 }
-
-mod result;
-pub use result::{_Err, _Ok};
-
-mod option;
-pub use option::{_None, _Some};
 
 #[cfg(test)]
 mod tests {

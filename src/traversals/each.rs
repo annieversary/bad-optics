@@ -1,13 +1,9 @@
-use crate::{
-    traversals::{TraversalOver, TraversalTraverse},
-    Optics, OpticsTrait,
-};
+use crate::traversals::{Traversal, TraversalOver, TraversalTraverse};
 
 #[derive(Clone, Copy)]
 pub struct EachInner;
 #[allow(non_upper_case_globals)]
-pub const each: Optics<EachInner> = Optics(EachInner);
-impl OpticsTrait for EachInner {}
+pub const each: Traversal<EachInner> = Traversal(EachInner);
 
 impl<T> TraversalTraverse<Vec<T>> for EachInner {
     type Field = T;

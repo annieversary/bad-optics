@@ -1,23 +1,19 @@
-use crate::{
-    lenses::{LensOver, LensView},
-    Optics, OpticsTrait,
-};
+use crate::lenses::{Lens, LensOver, LensView};
 
 #[derive(Clone, Copy)]
 pub struct _1Inner;
-pub const _1: Optics<_1Inner> = Optics(_1Inner);
-impl OpticsTrait for _1Inner {}
+pub const _1: Lens<_1Inner> = Lens(_1Inner);
 
 macro_rules! make_tuples {
     ($f:ident, ( $( $v:ident ),* ), ( $( $t:ident ),* ) ) => {
-      impl< $($t,)* > LensView<( $($t,)* )> for _1Inner {
+        impl< $($t,)* > LensView<( $($t,)* )> for _1Inner {
             type Field = T;
 
             fn view(&self, ( $($v,)* ): ($($t,)*)) -> Self::Field {
                 $f
             }
         }
-      impl< $($t,)* > LensOver<( $($t,)* )> for _1Inner {
+        impl< $($t,)* > LensOver<( $($t,)* )> for _1Inner {
             fn over<F>(
                 &self,
                 mut tup: ($($t,)*),
@@ -31,14 +27,14 @@ macro_rules! make_tuples {
             }
         }
 
-      impl<'a, $($t,)* > LensView<&'a ( $($t,)* )> for _1Inner {
+        impl<'a, $($t,)* > LensView<&'a ( $($t,)* )> for _1Inner {
             type Field = &'a T;
 
             fn view(&self, ( $($v,)* ): &'a ($($t,)*)) -> Self::Field {
                 $f
             }
         }
-      impl<'a, $($t,)* > LensView<&'a mut ( $($t,)* )> for _1Inner {
+        impl<'a, $($t,)* > LensView<&'a mut ( $($t,)* )> for _1Inner {
             type Field = &'a mut T;
 
             fn view(&self, ( $($v,)* ): &'a mut ($($t,)*)) -> Self::Field {

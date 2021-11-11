@@ -3,8 +3,7 @@ use super::*;
 #[derive(Clone, Copy)]
 pub struct OkInner;
 #[allow(non_upper_case_globals)]
-pub const _Ok: Optics<OkInner> = Optics(OkInner);
-impl OpticsTrait for OkInner {}
+pub const _Ok: Prism<OkInner> = Prism(OkInner);
 impl<T, E> PrismPreview<Result<T, E>> for OkInner {
     type Field = T;
 
@@ -22,9 +21,7 @@ impl<T, E> PrismReview<Result<T, E>> for OkInner {
 #[derive(Clone, Copy)]
 pub struct ErrInner;
 #[allow(non_upper_case_globals)]
-pub const _Err: Optics<ErrInner> = Optics(ErrInner);
-
-impl OpticsTrait for ErrInner {}
+pub const _Err: Prism<ErrInner> = Prism(ErrInner);
 
 impl<T, E> PrismPreview<Result<T, E>> for ErrInner {
     type Field = E;

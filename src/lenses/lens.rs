@@ -1,13 +1,9 @@
-use crate::{
-    lenses::{LensOver, LensView},
-    Optics, OpticsTrait,
-};
+use crate::lenses::{Lens, LensOver, LensView};
 
 type Getter<T, U> = dyn Fn(T) -> U;
 type Setter<T, U> = dyn Fn(T, U) -> T;
 
 pub struct LensInner<T, U>(pub(crate) Box<Getter<T, U>>, pub(crate) Box<Setter<T, U>>);
-impl<T, U> OpticsTrait for LensInner<T, U> {}
 
 impl<T, U> LensView<T> for LensInner<T, U> {
     type Field = U;
@@ -34,13 +30,13 @@ impl<T: Clone, U> LensOver<T> for LensInner<T, U> {
 pub fn lens_from_boxed<T, U>(
     getter: Box<Getter<T, U>>,
     setter: Box<Setter<T, U>>,
-) -> Optics<LensInner<T, U>> {
-    Optics(LensInner(getter, setter))
+) -> Lens<LensInner<T, U>> {
+    Lens(LensInner(getter, setter))
 }
 /// Makes a lens that implements `LensView<T>` and `LensOver<T>` with the provided functions
 pub fn lens<T, U>(
     getter: impl Fn(T) -> U + 'static,
     setter: impl Fn(T, U) -> T + 'static,
-) -> Optics<LensInner<T, U>> {
-    Optics(LensInner(Box::new(getter), Box::new(setter)))
+) -> Lens<LensInner<T, U>> {
+    Lens(LensInner(Box::new(getter), Box::new(setter)))
 }

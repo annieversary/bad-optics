@@ -11,10 +11,30 @@ pub use to::{to, to_from_boxed};
 mod lens;
 pub use lens::{lens, lens_from_boxed};
 
-use crate::{Optics, OpticsTrait};
+use crate::traversals::Traversal;
+
+/// Wrapper type
+#[derive(Clone, Copy)]
+#[repr(transparent)]
+pub struct Lens<L>(pub(crate) L);
+
+// all lenses are traversals, so we can freely transform them into a traversal
+impl<L> Lens<L> {
+    /// Returns this lens as a traversal
+    pub fn to_traversal(self) -> Traversal<Lens<L>> {
+        Traversal(self)
+    }
+}
+// we can go back to a lens from a "traversal-ed" lens
+impl<L> Traversal<Lens<L>> {
+    /// Returns the wrapped lens
+    pub fn to_lens(self) -> Lens<L> {
+        self.0
+    }
+}
 
 /// For lenses that allow viewing
-pub trait LensView<T>: OpticsTrait {
+pub trait LensView<T> {
     type Field;
 
     fn view(&self, thing: T) -> Self::Field;
@@ -31,7 +51,7 @@ pub trait LensOver<T>: LensView<T> {
     }
 }
 
-impl<L, T> LensView<T> for Optics<L>
+impl<L, T> LensView<T> for Lens<L>
 where
     L: LensView<T>,
 {
@@ -41,7 +61,7 @@ where
         L::view(&self.0, thing)
     }
 }
-impl<L, T> LensOver<T> for Optics<L>
+impl<L, T> LensOver<T> for Lens<L>
 where
     L: LensOver<T>,
 {

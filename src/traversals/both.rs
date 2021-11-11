@@ -1,13 +1,9 @@
-use crate::{
-    traversals::{TraversalOver, TraversalTraverse},
-    Optics, OpticsTrait,
-};
+use crate::traversals::{Traversal, TraversalOver, TraversalTraverse};
 
 #[derive(Clone, Copy)]
 pub struct BothInner;
 #[allow(non_upper_case_globals)]
-pub const both: Optics<BothInner> = Optics(BothInner);
-impl OpticsTrait for BothInner {}
+pub const both: Traversal<BothInner> = Traversal(BothInner);
 
 impl<T> TraversalTraverse<(T, T)> for BothInner {
     type Field = T;
