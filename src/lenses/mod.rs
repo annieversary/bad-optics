@@ -7,6 +7,9 @@ mod second;
 pub use second::_1;
 
 mod to;
+pub use to::{to, to_from_boxed};
+mod lens;
+pub use lens::{lens, lens_from_boxed};
 
 use crate::{Optics, OpticsTrait};
 
@@ -160,5 +163,54 @@ mod tests {
         assert_eq!(res, 2);
         let res = lens(a, |v| v + 1);
         assert_eq!(res, ((1, 3), 3));
+    }
+
+    #[derive(Debug, PartialEq, Clone)]
+    struct Hello {
+        hey: u8,
+    }
+
+    #[test]
+    fn can_use_to() {
+        // making a getter
+        let l = to(|hello: Hello| hello.hey);
+
+        let hello = Hello { hey: 8 };
+        assert_eq!(l(hello), 8);
+    }
+
+    #[test]
+    fn can_make_lens_out_of_funcs() {
+        // making a lens
+        let l = lens(
+            |hello: Hello| hello.hey,
+            |mut hello: Hello, v: u8| {
+                hello.hey = v;
+                hello
+            },
+        );
+
+        let hello = Hello { hey: 8 };
+        assert_eq!(l(hello), 8);
+
+        let hello = Hello { hey: 8 };
+        assert_eq!(l(hello, |v| v + 1), Hello { hey: 9 });
+    }
+
+    #[test]
+    fn can_make_lens_out_of_to() {
+        // we first use to, and then use that to make a full lens
+
+        let l = to(|hello: Hello| hello.hey);
+        let l = l.make_lens(|mut hello: Hello, v: u8| {
+            hello.hey = v;
+            hello
+        });
+
+        let hello = Hello { hey: 8 };
+        assert_eq!(l(hello), 8);
+
+        let hello = Hello { hey: 8 };
+        assert_eq!(l(hello, |v| v + 1), Hello { hey: 9 });
     }
 }
