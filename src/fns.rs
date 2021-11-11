@@ -10,7 +10,7 @@ where
     type Output = L::Field;
 
     extern "rust-call" fn call_once(self, args: (A,)) -> Self::Output {
-        L::view(args.0)
+        L::view(&self.0, args.0)
     }
 }
 impl<L, A> std::ops::FnMut<(A,)> for Optics<L>
@@ -18,7 +18,7 @@ where
     L: LensView<A>,
 {
     extern "rust-call" fn call_mut(&mut self, args: (A,)) -> Self::Output {
-        L::view(args.0)
+        L::view(&self.0, args.0)
     }
 }
 impl<L, A> std::ops::Fn<(A,)> for Optics<L>
@@ -26,7 +26,7 @@ where
     L: LensView<A>,
 {
     extern "rust-call" fn call(&self, args: (A,)) -> Self::Output {
-        L::view(args.0)
+        L::view(&self.0, args.0)
     }
 }
 
@@ -38,7 +38,7 @@ where
     type Output = A;
 
     extern "rust-call" fn call_once(self, args: (A, F)) -> Self::Output {
-        L::over(args.0, args.1)
+        L::over(&self.0, args.0, args.1)
     }
 }
 impl<L, A, F> std::ops::FnMut<(A, F)> for Optics<L>
@@ -47,7 +47,7 @@ where
     F: FnOnce(L::Field) -> L::Field,
 {
     extern "rust-call" fn call_mut(&mut self, args: (A, F)) -> Self::Output {
-        L::over(args.0, args.1)
+        L::over(&self.0, args.0, args.1)
     }
 }
 impl<L, A, F> std::ops::Fn<(A, F)> for Optics<L>
@@ -56,6 +56,6 @@ where
     F: FnOnce(L::Field) -> L::Field,
 {
     extern "rust-call" fn call(&self, args: (A, F)) -> Self::Output {
-        L::over(args.0, args.1)
+        L::over(&self.0, args.0, args.1)
     }
 }

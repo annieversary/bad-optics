@@ -6,23 +6,25 @@ pub use first::_0;
 mod second;
 pub use second::_1;
 
+mod to;
+
 use crate::{Optics, OpticsTrait};
 
 /// For lenses that allow viewing
 pub trait LensView<T>: OpticsTrait {
     type Field;
 
-    fn view(thing: T) -> Self::Field;
+    fn view(&self, thing: T) -> Self::Field;
 }
 
 /// For lenses that allow setting
 pub trait LensOver<T>: LensView<T> {
-    fn over<F>(thing: T, f: F) -> T
+    fn over<F>(&self, thing: T, f: F) -> T
     where
         F: FnOnce(Self::Field) -> Self::Field;
 
-    fn set(thing: T, v: Self::Field) -> T {
-        Self::over(thing, |_| v)
+    fn set(&self, thing: T, v: Self::Field) -> T {
+        Self::over(self, thing, |_| v)
     }
 }
 
@@ -32,30 +34,30 @@ where
 {
     type Field = L::Field;
 
-    fn view(thing: T) -> Self::Field {
-        L::view(thing)
+    fn view(&self, thing: T) -> Self::Field {
+        L::view(&self.0, thing)
     }
 }
 impl<L, T> LensOver<T> for Optics<L>
 where
     L: LensOver<T>,
 {
-    fn over<F>(thing: T, f: F) -> T
+    fn over<F>(&self, thing: T, f: F) -> T
     where
         F: FnOnce(Self::Field) -> Self::Field,
     {
-        L::over(thing, f)
+        L::over(&self.0, thing, f)
     }
 }
 
-pub fn view<T, L: LensView<T>>(_lens: L, thing: T) -> L::Field {
-    L::view(thing)
+pub fn view<T, L: LensView<T>>(lens: L, thing: T) -> L::Field {
+    L::view(&lens, thing)
 }
-pub fn set<T, L: LensOver<T>>(_lens: L, thing: T, v: L::Field) -> T {
-    L::set(thing, v)
+pub fn set<T, L: LensOver<T>>(lens: L, thing: T, v: L::Field) -> T {
+    L::set(&lens, thing, v)
 }
-pub fn over<T, L: LensOver<T>>(_lens: L, thing: T, f: impl FnOnce(L::Field) -> L::Field) -> T {
-    L::over(thing, f)
+pub fn over<T, L: LensOver<T>>(lens: L, thing: T, f: impl FnOnce(L::Field) -> L::Field) -> T {
+    L::over(&lens, thing, f)
 }
 
 #[cfg(test)]

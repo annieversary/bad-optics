@@ -13,12 +13,13 @@ macro_rules! make_tuples {
       impl< $($t,)* > LensView<( $($t,)* )> for _1Inner {
             type Field = T;
 
-            fn view(( $($v,)* ): ($($t,)*)) -> Self::Field {
+            fn view(&self, ( $($v,)* ): ($($t,)*)) -> Self::Field {
                 $f
             }
         }
       impl< $($t,)* > LensOver<( $($t,)* )> for _1Inner {
             fn over<F>(
+                &self,
                 mut tup: ($($t,)*),
                 f: F
             ) -> ( $($t,)* )
@@ -33,14 +34,14 @@ macro_rules! make_tuples {
       impl<'a, $($t,)* > LensView<&'a ( $($t,)* )> for _1Inner {
             type Field = &'a T;
 
-            fn view(( $($v,)* ): &'a ($($t,)*)) -> Self::Field {
+            fn view(&self, ( $($v,)* ): &'a ($($t,)*)) -> Self::Field {
                 $f
             }
         }
       impl<'a, $($t,)* > LensView<&'a mut ( $($t,)* )> for _1Inner {
             type Field = &'a mut T;
 
-            fn view(( $($v,)* ): &'a mut ($($t,)*)) -> Self::Field {
+            fn view(&self, ( $($v,)* ): &'a mut ($($t,)*)) -> Self::Field {
                 $f
             }
         }
@@ -60,12 +61,13 @@ macro_rules! make_arrays {
       impl<T> LensView<[T; $n]> for _1Inner {
             type Field = T;
 
-            fn view([ $($v,)* ]: [T; $n]) -> Self::Field {
+            fn view(&self, [ $($v,)* ]: [T; $n]) -> Self::Field {
                 $f
             }
         }
       impl<T> LensOver<[T; $n]> for _1Inner {
             fn over<F>(
+              &self,
               tup: [T; $n],
               fun: F
             ) -> [T; $n]
@@ -81,14 +83,14 @@ macro_rules! make_arrays {
       impl<'a, T> LensView<&'a [T; $n]> for _1Inner {
             type Field = &'a T;
 
-            fn view([ $($v,)* ]: &'a [T; $n]) -> Self::Field {
+            fn view(&self, [ $($v,)* ]: &'a [T; $n]) -> Self::Field {
                 $f
             }
         }
       impl<'a, T> LensView<&'a mut [T; $n]> for _1Inner {
             type Field = &'a mut T;
 
-            fn view([ $($v,)* ]: &'a mut [T; $n]) -> Self::Field {
+            fn view(&self, [ $($v,)* ]: &'a mut [T; $n]) -> Self::Field {
                 $f
             }
         }
