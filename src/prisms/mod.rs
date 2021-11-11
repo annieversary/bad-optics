@@ -88,7 +88,4 @@ mod tests {
         assert_eq!(review(_Some, 3), Some(3));
         assert_eq!(review(_None, ()), None::<()>);
     }
-
-    #[test]
-    fn view_combination() {}
 }

@@ -31,5 +31,5 @@ fn main() {
 
     // you can also call the lens as a function to modify the value
     let res = lens(a, |v| v + 1);
-    assert_eq!(res, ((1, 3), 3));
+    assert_eq!(res, ((1, 6), 3));
 }

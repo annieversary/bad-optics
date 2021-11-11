@@ -213,4 +213,28 @@ mod tests {
         let hello = Hello { hey: 8 };
         assert_eq!(l(hello, |v| v + 1), Hello { hey: 9 });
     }
+
+    #[test]
+    fn convoluted_example() {
+        #[derive(Debug, PartialEq, Clone)]
+        struct Hello2 {
+            hey: (u8, (u8, i32)),
+        }
+
+        // make a lens for Hello
+        let l = lens(
+            |hello: Hello2| hello.hey,
+            |mut hello: Hello2, v| {
+                hello.hey = v;
+                hello
+            },
+        );
+
+        let thing = Hello2 { hey: (1, (2, -3)) };
+        let thing = (thing, "hello");
+
+        let lens_that_targets_the_i32 = _0 + l + _1 + _1;
+
+        assert_eq!(lens_that_targets_the_i32(thing), -3);
+    }
 }
