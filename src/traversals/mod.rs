@@ -142,8 +142,6 @@ pub fn over<T, L: TraversalOver<T>>(lens: L, thing: T, f: impl FnMut(L::Field) -
 
 #[cfg(test)]
 mod tests {
-    use crate::{lenses::_0, prisms::_Some};
-
     use super::*;
 
     #[test]
@@ -155,87 +153,5 @@ mod tests {
 
         let res = each(array, |v| v + 1);
         assert_eq!(res, [2, 3, 4, 5]);
-    }
-
-    #[test]
-    fn can_combine_traversals() {
-        let array = [vec![1, 2], vec![3, 4]];
-
-        // combine two traversals
-        let res = (each + each)(array, |v| v + 1);
-        assert_eq!(res, [vec![2, 3], vec![4, 5]]);
-    }
-
-    #[test]
-    fn can_combine_traversal_with_lens() {
-        let array = [(1, 2), (3, 4), (5, 6)];
-
-        // combine a traversal with a lens
-        let t = each + _0;
-
-        // traverse
-        let res = t(array);
-        assert_eq!(res, vec![1, 3, 5]);
-
-        // over
-        let res = t(array, |v| v + 1);
-        assert_eq!(res, [(2, 2), (4, 4), (6, 6)]);
-    }
-
-    #[test]
-    fn can_combine_lens_with_traversal() {
-        let array = [(1, 2), (3, 4), (5, 6)];
-
-        // combine a traversal with a lens
-        let t = _0 + each;
-
-        // traverse
-        let res = t(array);
-        assert_eq!(res, vec![1, 2]);
-
-        // over
-        let res = t(array, |v| v + 1);
-        assert_eq!(res, [(2, 3), (3, 4), (5, 6)]);
-    }
-
-    #[test]
-    fn can_combine_prism_with_traversal() {
-        let array = [Some(1), None, Some(3), None, Some(5)];
-
-        // combine a traversal with a lens
-        let t = each + _Some;
-
-        // traverse
-        let res = t(array);
-        assert_eq!(res, vec![1, 3, 5]);
-
-        // over
-        let res = t(array, |v| v + 1);
-        assert_eq!(res, [Some(2), None, Some(4), None, Some(6)]);
-    }
-
-    #[test]
-    fn can_combine_traversal_with_prism() {
-        let array = Some([1, 2, 3]);
-
-        // combine a traversal with a lens
-        let t = _Some + each;
-
-        // traverse
-        let res = t(array);
-        assert_eq!(res, vec![1, 2, 3]);
-
-        // over
-        let res = t(array, |v| v + 1);
-        assert_eq!(res, Some([2, 3, 4]));
-
-        let array: Option<[i32; 3]> = None;
-        // traverse
-        let res = t(array);
-        assert_eq!(res, vec![]);
-
-        // over
-        let res = t(array, |v| v + 1);
-        assert_eq!(res, None);
     }
 }

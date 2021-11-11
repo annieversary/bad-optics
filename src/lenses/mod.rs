@@ -130,24 +130,6 @@ mod tests {
     }
 
     #[test]
-    fn view_combination() {
-        let a = ((1, 2), 3);
-
-        let lens = _0 + _1;
-        let a = view(lens, a);
-        assert_eq!(a, 2);
-    }
-
-    #[test]
-    fn over_combination() {
-        let a = ((1, 2), 3);
-
-        let lens = _0 + _1;
-        let a = over(lens, a, |v| v + 1);
-        assert_eq!(a, ((1, 3), 3));
-    }
-
-    #[test]
     fn call_as_funcs() {
         let a = (1, 2);
         assert_eq!(_0(a), 1);
