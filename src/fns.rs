@@ -1,5 +1,6 @@
 use crate::{
     lenses::{Lens, LensOver, LensView},
+    prisms::{Prism, PrismPreview},
     traversals::{Traversal, TraversalOver, TraversalTraverse},
 };
 
@@ -114,6 +115,68 @@ where
 impl<L, A, F> std::ops::Fn<(A, F)> for Traversal<L>
 where
     L: TraversalOver<A>,
+    F: FnMut(L::Field) -> L::Field,
+{
+    extern "rust-call" fn call(&self, args: (A, F)) -> Self::Output {
+        L::over(&self.0, args.0, args.1)
+    }
+}
+
+// prism preview
+impl<L, A> std::ops::FnOnce<(A,)> for Prism<L>
+where
+    L: PrismPreview<A>,
+{
+    type Output = Option<L::Field>;
+
+    extern "rust-call" fn call_once(self, args: (A,)) -> Self::Output {
+        L::preview(&self.0, args.0)
+    }
+}
+impl<L, A> std::ops::FnMut<(A,)> for Prism<L>
+where
+    L: PrismPreview<A>,
+{
+    extern "rust-call" fn call_mut(&mut self, args: (A,)) -> Self::Output {
+        L::preview(&self.0, args.0)
+    }
+}
+impl<L, A> std::ops::Fn<(A,)> for Prism<L>
+where
+    L: PrismPreview<A>,
+{
+    extern "rust-call" fn call(&self, args: (A,)) -> Self::Output {
+        L::preview(&self.0, args.0)
+    }
+}
+
+// prism over
+impl<L, A, F> std::ops::FnOnce<(A, F)> for Prism<L>
+where
+    A: Clone,
+    L: PrismPreview<A>,
+    F: FnMut(L::Field) -> L::Field,
+{
+    type Output = A;
+
+    extern "rust-call" fn call_once(self, args: (A, F)) -> Self::Output {
+        L::over(&self.0, args.0, args.1)
+    }
+}
+impl<L, A, F> std::ops::FnMut<(A, F)> for Prism<L>
+where
+    A: Clone,
+    L: PrismPreview<A>,
+    F: FnMut(L::Field) -> L::Field,
+{
+    extern "rust-call" fn call_mut(&mut self, args: (A, F)) -> Self::Output {
+        L::over(&self.0, args.0, args.1)
+    }
+}
+impl<L, A, F> std::ops::Fn<(A, F)> for Prism<L>
+where
+    A: Clone,
+    L: PrismPreview<A>,
     F: FnMut(L::Field) -> L::Field,
 {
     extern "rust-call" fn call(&self, args: (A, F)) -> Self::Output {

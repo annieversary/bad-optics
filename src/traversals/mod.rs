@@ -4,7 +4,10 @@ pub use both::both;
 mod each;
 pub use each::each;
 
-use crate::lenses::{Lens, LensOver, LensView};
+use crate::{
+    lenses::{Lens, LensOver, LensView},
+    prisms::{Prism, PrismPreview},
+};
 
 /// Wrapper type
 #[derive(Clone, Copy)]
@@ -87,6 +90,43 @@ where
     }
 }
 
+// all prisms are traversals, so we can freely transform them into a traversal
+impl<L> Prism<L> {
+    /// Returns this lens as a traversal
+    pub fn to_traversal(self) -> Traversal<Prism<L>> {
+        Traversal(self)
+    }
+}
+// we can go back to a lens from a "traversal-ed" lens
+impl<L> Traversal<Prism<L>> {
+    /// Returns the wrapped lens
+    pub fn to_prism(self) -> Prism<L> {
+        self.0
+    }
+}
+impl<L, T> TraversalTraverse<T> for Prism<L>
+where
+    L: PrismPreview<T>,
+{
+    type Field = L::Field;
+
+    fn traverse(&self, thing: T) -> Vec<Self::Field> {
+        L::preview(&self.0, thing).into_iter().collect()
+    }
+}
+impl<L, T> TraversalOver<T> for Prism<L>
+where
+    T: Clone,
+    L: PrismPreview<T>,
+{
+    fn over<F>(&self, thing: T, f: F) -> T
+    where
+        F: FnMut(Self::Field) -> Self::Field,
+    {
+        L::over(&self.0, thing, f)
+    }
+}
+
 pub fn traverse<T, L: TraversalTraverse<T>>(lens: L, thing: T) -> Vec<L::Field> {
     L::traverse(&lens, thing)
 }
@@ -102,7 +142,7 @@ pub fn over<T, L: TraversalOver<T>>(lens: L, thing: T, f: impl FnMut(L::Field) -
 
 #[cfg(test)]
 mod tests {
-    use crate::lenses::_0;
+    use crate::{lenses::_0, prisms::_Some};
 
     use super::*;
 
@@ -156,5 +196,46 @@ mod tests {
         // over
         let res = t(array, |v| v + 1);
         assert_eq!(res, [(2, 3), (3, 4), (5, 6)]);
+    }
+
+    #[test]
+    fn can_combine_prism_with_traversal() {
+        let array = [Some(1), None, Some(3), None, Some(5)];
+
+        // combine a traversal with a lens
+        let t = each + _Some;
+
+        // traverse
+        let res = t(array);
+        assert_eq!(res, vec![1, 3, 5]);
+
+        // over
+        let res = t(array, |v| v + 1);
+        assert_eq!(res, [Some(2), None, Some(4), None, Some(6)]);
+    }
+
+    #[test]
+    fn can_combine_traversal_with_prism() {
+        let array = Some([1, 2, 3]);
+
+        // combine a traversal with a lens
+        let t = _Some + each;
+
+        // traverse
+        let res = t(array);
+        assert_eq!(res, vec![1, 2, 3]);
+
+        // over
+        let res = t(array, |v| v + 1);
+        assert_eq!(res, Some([2, 3, 4]));
+
+        let array: Option<[i32; 3]> = None;
+        // traverse
+        let res = t(array);
+        assert_eq!(res, vec![]);
+
+        // over
+        let res = t(array, |v| v + 1);
+        assert_eq!(res, None);
     }
 }
