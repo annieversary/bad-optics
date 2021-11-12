@@ -4,6 +4,11 @@ pub use both::both;
 mod each;
 pub use each::each;
 
+mod head;
+pub use head::_head;
+mod tail;
+pub use tail::_tail;
+
 use crate::{
     lenses::{Lens, LensOver, LensView},
     prisms::{Prism, PrismPreview},
@@ -153,5 +158,27 @@ mod tests {
 
         let res = each(array, |v| v + 1);
         assert_eq!(res, [2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn traverse_head_works_on_arrays() {
+        let array = [1, 2, 3, 4];
+
+        let res = _head(array);
+        assert_eq!(res, vec![1,]);
+
+        let res = _head(array, |v| v + 1);
+        assert_eq!(res, [2, 2, 3, 4,]);
+    }
+
+    #[test]
+    fn traverse_tail_works_on_arrays() {
+        let array = [1, 2, 3, 4];
+
+        let res = _tail(array);
+        assert_eq!(res, vec![2, 3, 4]);
+
+        let res = _tail(array, |v| v + 1);
+        assert_eq!(res, [1, 3, 4, 5]);
     }
 }
