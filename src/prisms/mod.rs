@@ -1,7 +1,7 @@
-mod result;
+pub mod result;
 pub use result::{_Err, _Ok};
 
-mod option;
+pub mod option;
 pub use option::{_None, _Some};
 
 /// Wrapper type

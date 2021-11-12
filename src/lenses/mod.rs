@@ -1,22 +1,22 @@
-mod fields;
+pub mod fields;
 
-mod identity;
+pub mod identity;
 pub use identity::id;
 
-mod first;
+pub mod first;
 pub use first::_0;
-mod second;
+pub mod second;
 pub use second::_1;
-mod third;
+pub mod third;
 pub use third::_2;
-mod fourth;
+pub mod fourth;
 pub use fourth::_3;
-mod fifth;
+pub mod fifth;
 pub use fifth::_4;
 
-mod to;
+pub mod to;
 pub use to::{to, to_from_boxed};
-mod lens;
+pub mod lens;
 pub use lens::{lens, lens_from_boxed};
 
 /// Wrapper type

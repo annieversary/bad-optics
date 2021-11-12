@@ -1,12 +1,12 @@
-mod both;
+pub mod both;
 pub use both::both;
 
-mod each;
+pub mod each;
 pub use each::each;
 
-mod head;
+pub mod head;
 pub use head::_head;
-mod tail;
+pub mod tail;
 pub use tail::_tail;
 
 use crate::{
@@ -62,7 +62,7 @@ where
 // all lenses are traversals, so we can freely transform them into a traversal
 impl<L> Lens<L> {
     /// Returns this lens as a traversal
-    pub fn to_traversal(self) -> Traversal<Lens<L>> {
+    pub const fn to_traversal(self) -> Traversal<Lens<L>> {
         Traversal(self)
     }
 }
@@ -98,7 +98,7 @@ where
 // all prisms are traversals, so we can freely transform them into a traversal
 impl<L> Prism<L> {
     /// Returns this lens as a traversal
-    pub fn to_traversal(self) -> Traversal<Prism<L>> {
+    pub const fn to_traversal(self) -> Traversal<Prism<L>> {
         Traversal(self)
     }
 }

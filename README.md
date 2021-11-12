@@ -6,7 +6,9 @@ ergonomic lenses in rust
 
 it does *not* implement the operators, as it's not really a thing we can do in rust
 
-does bringing lenses into rust actually make sense? probably not, but it was fun to implement
+you will need nightly for this library to work, as it uses a bunch of unstable features. they're technically not *critical*, but i think not having them reduces the ergonomics too much
+
+does bringing lenses into rust actually make sense? probably not, but it was fun to implement so who can say
 
 ## example
 

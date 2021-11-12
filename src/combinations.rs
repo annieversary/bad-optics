@@ -3,6 +3,7 @@ use crate::{
     prisms::{Prism, PrismPreview},
     traversals::{Traversal, TraversalOver, TraversalTraverse},
 };
+use std::ops::Add;
 
 #[derive(Clone, Copy)]
 pub struct Combination<A, B>(A, B);
@@ -10,7 +11,7 @@ pub struct Combination<A, B>(A, B);
 // additions
 
 // lens + lens
-impl<A, B> std::ops::Add<Lens<B>> for Lens<A> {
+impl<A, B> const Add<Lens<B>> for Lens<A> {
     type Output = Lens<Combination<Lens<A>, Lens<B>>>;
 
     fn add(self, rhs: Lens<B>) -> Self::Output {
@@ -18,7 +19,7 @@ impl<A, B> std::ops::Add<Lens<B>> for Lens<A> {
     }
 }
 // prism + prism
-impl<A, B> std::ops::Add<Prism<B>> for Prism<A> {
+impl<A, B> const Add<Prism<B>> for Prism<A> {
     type Output = Prism<Combination<Prism<A>, Prism<B>>>;
 
     fn add(self, rhs: Prism<B>) -> Self::Output {
@@ -26,7 +27,7 @@ impl<A, B> std::ops::Add<Prism<B>> for Prism<A> {
     }
 }
 // traversal + traversal
-impl<A, B> std::ops::Add<Traversal<B>> for Traversal<A> {
+impl<A, B> const Add<Traversal<B>> for Traversal<A> {
     type Output = Traversal<Combination<Traversal<A>, Traversal<B>>>;
 
     fn add(self, rhs: Traversal<B>) -> Self::Output {
@@ -34,7 +35,7 @@ impl<A, B> std::ops::Add<Traversal<B>> for Traversal<A> {
     }
 }
 // traversal + lens
-impl<A, B> std::ops::Add<Lens<B>> for Traversal<A> {
+impl<A, B> const Add<Lens<B>> for Traversal<A> {
     type Output = Traversal<Combination<Traversal<A>, Traversal<Lens<B>>>>;
 
     fn add(self, rhs: Lens<B>) -> Self::Output {
@@ -42,7 +43,7 @@ impl<A, B> std::ops::Add<Lens<B>> for Traversal<A> {
     }
 }
 // lens + traversal
-impl<A, B> std::ops::Add<Traversal<B>> for Lens<A> {
+impl<A, B> const Add<Traversal<B>> for Lens<A> {
     type Output = Traversal<Combination<Traversal<Lens<A>>, Traversal<B>>>;
 
     fn add(self, rhs: Traversal<B>) -> Self::Output {
@@ -50,7 +51,7 @@ impl<A, B> std::ops::Add<Traversal<B>> for Lens<A> {
     }
 }
 // traversal + prism
-impl<A, B> std::ops::Add<Prism<B>> for Traversal<A> {
+impl<A, B> const Add<Prism<B>> for Traversal<A> {
     type Output = Traversal<Combination<Traversal<A>, Traversal<Prism<B>>>>;
 
     fn add(self, rhs: Prism<B>) -> Self::Output {
@@ -58,7 +59,7 @@ impl<A, B> std::ops::Add<Prism<B>> for Traversal<A> {
     }
 }
 // prism + traversal
-impl<A, B> std::ops::Add<Traversal<B>> for Prism<A> {
+impl<A, B> const Add<Traversal<B>> for Prism<A> {
     type Output = Traversal<Combination<Traversal<Prism<A>>, Traversal<B>>>;
 
     fn add(self, rhs: Traversal<B>) -> Self::Output {
@@ -66,7 +67,7 @@ impl<A, B> std::ops::Add<Traversal<B>> for Prism<A> {
     }
 }
 // lens + prism
-impl<A, B> std::ops::Add<Prism<B>> for Lens<A> {
+impl<A, B> const Add<Prism<B>> for Lens<A> {
     type Output = Traversal<Combination<Traversal<Lens<A>>, Traversal<Prism<B>>>>;
 
     fn add(self, rhs: Prism<B>) -> Self::Output {
@@ -74,7 +75,7 @@ impl<A, B> std::ops::Add<Prism<B>> for Lens<A> {
     }
 }
 // prism + traversal
-impl<A, B> std::ops::Add<Lens<B>> for Prism<A> {
+impl<A, B> const Add<Lens<B>> for Prism<A> {
     type Output = Traversal<Combination<Traversal<Prism<A>>, Traversal<Lens<B>>>>;
 
     fn add(self, rhs: Lens<B>) -> Self::Output {
@@ -320,5 +321,18 @@ mod tests {
         // over
         let res = t(thing, |v| v + 1);
         assert_eq!(res, (Some(2), 2));
+    }
+
+    #[test]
+    fn can_combine_as_const() {
+        use crate::lenses::first::_0Inner;
+        use crate::lenses::Lens;
+        const LENS: Lens<super::Combination<Lens<_0Inner>, Lens<_0Inner>>> = _0 + _0;
+
+        let thing: ((i32, i32), i32) = ((1, 2), 3);
+
+        let r: i32 = LENS(thing);
+
+        assert_eq!(r, 1);
     }
 }

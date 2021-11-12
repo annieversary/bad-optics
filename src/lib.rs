@@ -1,4 +1,4 @@
-#![feature(unboxed_closures, fn_traits)]
+#![feature(unboxed_closures, fn_traits, const_trait_impl)]
 
 pub mod combinations;
 mod fns;
