@@ -1,4 +1,4 @@
-use bad_optics::{lenses::*, prisms::*, traversals::*};
+use bad_optics::prelude::*;
 
 #[derive(Debug, PartialEq, Clone)]
 struct MyStruct {

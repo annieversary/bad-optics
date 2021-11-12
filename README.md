@@ -1,13 +1,19 @@
 # bad optics
 
-ergonomic no-macro lenses for rust
+ergonomic lenses in rust
+
+`bad-optics` implements the haskell concept of lenses, prisms, and traversals in rust
+
+it does *not* implement the operators, as it's not really a thing we can do in rust
+
+does bringing lenses into rust actually make sense? probably not, but it was fun to implement
 
 ## example
 
 ```rust
 use bad_optics::{
-lenses::{_0, _1},
-*,
+    lenses::{over, set},
+    prelude::*,
 };
 
 fn main() {
@@ -41,6 +47,12 @@ fn main() {
 
     // you can also call the lens as a function to modify the value
     let res = lens(a, |v| v + 1);
-    assert_eq!(res, ((1, 3), 3));
+    assert_eq!(res, ((1, 6), 3));
 }
 ```
+
+## how to use
+
+bad-optics provides some of the lenses, prisms, and traversals defined in `lens`. i'm still trying to add more, so if there's one you need and it's missing from here, feel free to open a PR
+
+if you don't know how lenses work, this is not really gonna be a tutorial, you should read [this](https://hackage.haskell.org/package/lens-tutorial-1.0.3/docs/Control-Lens-Tutorial.html) first instead. the general idea is that they are first-class getters and setters

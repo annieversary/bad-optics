@@ -1,4 +1,7 @@
-use bad_optics::lenses::*;
+use bad_optics::{
+    lenses::{over, set},
+    prelude::*,
+};
 
 fn main() {
     let a = ((1, 2), 3);
