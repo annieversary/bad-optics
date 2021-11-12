@@ -9,6 +9,11 @@ pub use head::_head;
 pub mod tail;
 pub use tail::_tail;
 
+pub mod init;
+pub use init::_init;
+pub mod last;
+pub use last::_last;
+
 use crate::{
     lenses::{Lens, LensOver, LensView},
     prisms::{Prism, PrismPreview},
@@ -180,5 +185,27 @@ mod tests {
 
         let res = _tail(array, |v| v + 1);
         assert_eq!(res, [1, 3, 4, 5]);
+    }
+
+    #[test]
+    fn traverse_init_works_on_arrays() {
+        let array = [1, 2, 3, 4];
+
+        let res = _init(array);
+        assert_eq!(res, vec![1, 2, 3]);
+
+        let res = _init(array, |v| v + 1);
+        assert_eq!(res, [2, 3, 4, 4,]);
+    }
+
+    #[test]
+    fn traverse_last_works_on_arrays() {
+        let array = [1, 2, 3, 4];
+
+        let res = _last(array);
+        assert_eq!(res, vec![4]);
+
+        let res = _last(array, |v| v + 1);
+        assert_eq!(res, [1, 2, 3, 5]);
     }
 }
