@@ -7,6 +7,8 @@ pub mod prisms;
 pub mod traversals;
 
 pub mod prelude {
+    pub use bad_optics_derive::Optics;
+
     pub use crate::combinations::*;
 
     pub use crate::lenses::*;

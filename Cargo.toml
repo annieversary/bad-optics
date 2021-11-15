@@ -3,6 +3,8 @@ name = "bad-optics"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[workspace]
+members = ["bad-optics-derive"]
 
 [dependencies]
+bad-optics-derive = { path = "./bad-optics-derive" }
