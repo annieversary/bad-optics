@@ -30,7 +30,7 @@ impl<T: Clone, U> LensOver<T> for FuncLens<T, U> {
 }
 
 /// Makes a lens that implements `LensView<T>` and `LensOver<T>` with the provided functions
-pub fn lens_from_boxed<T, U>(
+pub fn lens_from_arc<T, U>(
     getter: Arc<Getter<T, U>>,
     setter: Arc<Setter<T, U>>,
 ) -> Lens<FuncLens<T, U>> {

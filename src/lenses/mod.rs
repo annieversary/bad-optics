@@ -15,9 +15,11 @@ pub mod fifth;
 pub use fifth::_4;
 
 pub mod to;
-pub use to::{to, to_from_boxed};
+pub use to::{to, to_from_arc};
 pub mod lens;
-pub use lens::{lens, lens_from_boxed};
+pub use lens::{lens, lens_from_arc};
+pub mod lens_with_ref;
+pub use lens_with_ref::{lens_with_ref, lens_with_ref_from_arc};
 
 /// Wrapper type
 #[derive(Clone, Copy)]

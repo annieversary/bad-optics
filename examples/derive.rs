@@ -23,12 +23,15 @@ fn main() {
 
     // we can manually get lenses for each field
     // note that it's a function that returns a lens
+    //
+    // these lenses work for `MyStruct` with `view` and `over`,
+    // and for `&MyStruct` with `view`
     let field1 = mystruct::field1();
     let field2 = mystruct::field2();
 
     // the lenses work normally as any other lens :)
-    assert_eq!(field1(o.clone()), "first field");
-    assert_eq!(field2(o.clone()), "second field");
+    assert_eq!(field1(&o), "first field");
+    assert_eq!(field2(&o), "second field");
 
     // we can get a vec with all the lenses that match a type
     let string_lenses = mystruct::Lenses::<String>::get();

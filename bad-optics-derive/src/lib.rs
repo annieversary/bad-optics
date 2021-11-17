@@ -55,9 +55,19 @@ fn expand_struct(data: DataStruct, name: &Ident, mod_name: &Ident) -> TokenStrea
             let ty = &field.ty;
             quote! {
                 pub fn #fname() ->
-                    bad_optics::lenses::Lens<bad_optics::lenses::lens::FuncLens<#name, #ty>>
+                    bad_optics::lenses::Lens<
+                        bad_optics::lenses::lens_with_ref::LensWithRef<
+                            bad_optics::lenses::Lens<
+                                bad_optics::lenses::lens::FuncLens<#name, #ty>
+                            >,
+                            bad_optics::lenses::Lens<
+                                bad_optics::lenses::to::ToRefInner<#name, #ty>
+                            >,
+                            #name
+                        >
+                    >
                 {
-                    bad_optics::field_lens!(#name, #fname)
+                    bad_optics::field_lens_with_ref!(#name, #fname)
                 }
             }
         })
@@ -71,7 +81,7 @@ fn expand_struct(data: DataStruct, name: &Ident, mod_name: &Ident) -> TokenStrea
                 .map(|field| {
                     let fname = field.ident.unwrap();
                     quote! {
-                        bad_optics::field_lens!(#name, #fname),
+                        bad_optics::field_lens_with_ref!(#name, #fname),
                     }
                 })
                 .collect::<TokenStream>();
@@ -79,7 +89,19 @@ fn expand_struct(data: DataStruct, name: &Ident, mod_name: &Ident) -> TokenStrea
             quote! {
                 impl Lenses<#ty> {
                     pub fn get() ->
-                        Vec<bad_optics::lenses::Lens<bad_optics::lenses::lens::FuncLens<#name, #ty>>>
+                          Vec<
+                              bad_optics::lenses::Lens<
+                                  bad_optics::lenses::lens_with_ref::LensWithRef<
+                                    bad_optics::lenses::Lens<
+                                        bad_optics::lenses::lens::FuncLens<#name, #ty>
+                                        >,
+                                      bad_optics::lenses::Lens<
+                                        bad_optics::lenses::to::ToRefInner<#name, #ty>
+                                        >,
+                                    #name
+                                  >
+                                >
+                            >
                     {
                         vec![
                             #lenses
