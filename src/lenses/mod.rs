@@ -187,6 +187,20 @@ mod tests {
     }
 
     #[test]
+    fn can_make_lens_with_ref_for_field() {
+        // making a lens
+        let l = crate::field_lens_with_ref!(Hello, hey);
+
+        let hello = Hello { hey: 8 };
+        // as ref
+        assert_eq!(l(&hello), 8);
+        // as move
+        assert_eq!(l(hello.clone()), 8);
+
+        assert_eq!(l(hello, |v| v + 1), Hello { hey: 9 });
+    }
+
+    #[test]
     fn can_make_lens_out_of_funcs() {
         // making a lens
         let l = lens(
