@@ -21,11 +21,7 @@ pub trait PrismPreview<T> {
         F: FnOnce(Self::Field) -> Self::Field,
         T: Clone,
     {
-        if let Some(a) = Self::preview(&self, thing.clone()) {
-            Self::review(&self, f(a))
-        } else {
-            thing
-        }
+        Self::preview(self, thing.clone()).map_or(thing, |a| Self::review(self, f(a)))
     }
 
     fn set(&self, thing: T, v: Self::Field) -> T
@@ -33,7 +29,7 @@ pub trait PrismPreview<T> {
         T: Clone,
         Self::Field: Clone,
     {
-        Self::over(self, thing, move |_| v.clone())
+        Self::over(self, thing, move |_| v)
     }
 }
 

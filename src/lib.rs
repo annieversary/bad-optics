@@ -1,4 +1,5 @@
 #![feature(unboxed_closures, fn_traits, const_trait_impl)]
+#![allow(clippy::type_complexity)]
 
 pub mod combinations;
 mod fns;

@@ -144,8 +144,7 @@ where
     fn traverse(&self, thing: T) -> Vec<Self::Field> {
         let a = A::traverse(&self.0 .0, thing);
         a.into_iter()
-            .map(|v| B::traverse(&self.1 .0, v))
-            .flatten()
+            .flat_map(|v| B::traverse(&self.1 .0, v))
             .collect()
     }
 }
