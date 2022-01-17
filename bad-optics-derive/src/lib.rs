@@ -13,9 +13,10 @@ pub fn derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
     let name = &input.ident;
     let mod_name = Ident::new(&get_mod_name(&input), Span::call_site());
+    let container_name = Ident::new(&get_container_name(&input), Span::call_site());
 
     let expanded = match input.data {
-        syn::Data::Struct(s) => expand_struct(s, name, &mod_name),
+        syn::Data::Struct(s) => expand_struct(s, name, &mod_name, &container_name),
         syn::Data::Enum(_) => todo!("not yet implemented for prisms"),
         syn::Data::Union(_) => panic!("this macro does not work on unions"),
     };
@@ -40,7 +41,28 @@ fn get_mod_name(input: &DeriveInput) -> String {
     input.ident.to_string().to_lowercase()
 }
 
-fn expand_struct(data: DataStruct, name: &Ident, mod_name: &Ident) -> TokenStream {
+fn get_container_name(input: &DeriveInput) -> String {
+    for i in &input.attrs {
+        if let Ok(Meta::NameValue(meta)) = i.parse_meta() {
+            if let Some(ident) = meta.path.get_ident() {
+                if ident == "container_name" {
+                    if let Lit::Str(a) = meta.lit {
+                        return a.value();
+                    }
+                }
+            }
+        }
+    }
+
+    format!("{}LensContainer", input.ident.to_string())
+}
+
+fn expand_struct(
+    data: DataStruct,
+    name: &Ident,
+    mod_name: &Ident,
+    container_name: &Ident,
+) -> TokenStream {
     let fields = match &data.fields {
         syn::Fields::Named(n) => n.named.iter(),
         syn::Fields::Unnamed(_) => todo!(),
@@ -87,8 +109,8 @@ fn expand_struct(data: DataStruct, name: &Ident, mod_name: &Ident) -> TokenStrea
                 .collect::<TokenStream>();
 
             quote! {
-                impl Lenses<#ty> {
-                    pub fn get() ->
+                impl bad_optics::has_lens::HasLensOf<#ty> for #name {
+                    fn get() ->
                           Vec<
                               bad_optics::lenses::Lens<
                                   bad_optics::lenses::lens_with_ref::LensWithRef<
@@ -113,12 +135,19 @@ fn expand_struct(data: DataStruct, name: &Ident, mod_name: &Ident) -> TokenStrea
         .collect::<TokenStream>();
 
     quote! {
-        pub mod #mod_name {
+        mod #mod_name {
             use super::*;
 
-            #lens_funcs
+            pub struct #container_name;
 
-            pub struct Lenses<T>(std::marker::PhantomData<T>);
+            impl HasLens for #name {
+                type Lenses = #container_name;
+            }
+
+            impl #container_name {
+                #lens_funcs
+            }
+
             #group_impls
         }
     }
